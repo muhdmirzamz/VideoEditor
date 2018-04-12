@@ -212,9 +212,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				
 				alertController.addAction(okAction)
 				
-				self.present(alertController, animated: true) {
-					UISaveVideoAtPathToSavedPhotosAlbum((outputURL?.path)!, nil, nil, nil)
-				}
+				self.present(alertController, animated: true, completion: nil)
 			}
 		}
 		
@@ -237,18 +235,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				print("File does not exist")
 			}
 			
-			if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((outputURL?.path)!) {
-				let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
-				let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
-					UISaveVideoAtPathToSavedPhotosAlbum((outputURL?.path)!, nil, nil, nil)
-				}
-				
-				alertController.addAction(okAction)
-				
-				self.present(alertController, animated: true) {
-					UISaveVideoAtPathToSavedPhotosAlbum((outputURL?.path)!, nil, nil, nil)
-				}
-			}
+			// might want to prompt user to retry saving since there is sort of like a null pointer bug case scenario we are dealing with here
+			
+//			if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((outputURL?.path)!) {
+//				let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
+//				let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
+//					UISaveVideoAtPathToSavedPhotosAlbum((outputURL?.path)!, nil, nil, nil)
+//				}
+//
+//				alertController.addAction(okAction)
+//
+//				self.present(alertController, animated: true, completion: nil)
+//			}
 			
 			print("\n\nExport error: \(session.error)")
 		}
