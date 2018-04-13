@@ -182,26 +182,50 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		
 		
-		
-		let docDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-		let savePath = (docDirectory as NSString).appending("/mergevideo.mov")
+		let fileManager = FileManager.default
+		let docDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+		let savePath = docDirectory.path.appending("/mergevideo.mov")
 		let url = NSURL.fileURL(withPath: savePath)
 		
-		print("URL: \(url)")
+		var fileExists = false
+
 		
-		self.exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
-		self.exporter?.outputURL = url
-		self.exporter?.outputFileType = AVFileType.mov
-		self.exporter?.videoComposition = mainComposition
-		self.exporter?.exportAsynchronously(completionHandler: {
-			DispatchQueue.main.async {
-				self.exportDidFinish(session: self.exporter!)
+		if fileManager.fileExists(atPath: url.path) {
+			fileExists = true
+			
+			do {
+				try fileManager.removeItem(atPath: url.path)
+				
+				if fileManager.fileExists(atPath: url.path) == false {
+					print("File does not exist anymore")
+					fileExists = false
+				}
+			} catch {
+				print("Error")
 			}
-		})
+		} else {
+			fileExists = false
+		}
+		
+		if fileExists == false {
+			self.exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
+			self.exporter?.outputURL = url
+			self.exporter?.outputFileType = AVFileType.mov
+			self.exporter?.videoComposition = mainComposition
+			self.exporter?.exportAsynchronously(completionHandler: {
+				DispatchQueue.main.async {
+					self.exportDidFinish(session: self.exporter!)
+				}
+			})
+		}
 	}
 	
 	func exportDidFinish(session: AVAssetExportSession) {
+		print("Session status: \(session.status.rawValue)")
+		
 		if session.status == .completed {
+			print("Completed")
+			
 			let outputURL = session.outputURL
 			
 			if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((outputURL?.path)!) {
@@ -217,38 +241,15 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		}
 		
 		if session.status == .failed {
-			let outputURL = session.outputURL
+			print("Failed")
 			
-			let fileManager = FileManager.default
+			let alertController = UIAlertController.init(title: "Failed", message: "", preferredStyle: .alert)
+			let okAction = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
 			
-			if fileManager.fileExists(atPath: (outputURL?.path)!) {
-				do {
-					print("FILE EXISTS")
-					print("Output url path: \((outputURL?.path)!)")
-					try fileManager.removeItem(atPath: (outputURL?.path)!)
-					
-					print("Removed item")
-				} catch {
-					print("Failed to remove file")
-				}
-			} else {
-				print("File does not exist")
-			}
+			alertController.addAction(okAction)
 			
+			self.present(alertController, animated: true, completion: nil)
 			// might want to prompt user to retry saving since there is sort of like a null pointer bug case scenario we are dealing with here
-			
-//			if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((outputURL?.path)!) {
-//				let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
-//				let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
-//					UISaveVideoAtPathToSavedPhotosAlbum((outputURL?.path)!, nil, nil, nil)
-//				}
-//
-//				alertController.addAction(okAction)
-//
-//				self.present(alertController, animated: true, completion: nil)
-//			}
-			
-			print("\n\nExport error: \(session.error)")
 		}
 	}
 	
