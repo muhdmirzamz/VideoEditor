@@ -183,28 +183,47 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		
 		let fileManager = FileManager.default
-		let docDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-		let savePath = docDirectory.path.appending("/mergevideo.mov")
-		let url = NSURL.fileURL(withPath: savePath)
+		
+		
+		
+//		let docDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+//		let savePath = docDirectory.path.appending("/mergevideo.mov")
+		
+		
+		let randPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path.appending("/mergevideo.mov")
+		let url = NSURL.fileURL(withPath: randPath)
+		
+		print("\n\n")
+		print("URL: \(url)")
+		print("absoluteString: \(url.absoluteString)")
+		print("randPath: \(randPath)")
 		
 		var fileExists = false
-
 		
-		if fileManager.fileExists(atPath: url.path) {
-			fileExists = true
+		if fileManager.fileExists(atPath: randPath) {
 			
-			do {
-				try fileManager.removeItem(atPath: url.path)
-				
-				if fileManager.fileExists(atPath: url.path) == false {
-					print("File does not exist anymore")
-					fileExists = false
+			print("File exists!")
+			
+			fileExists = true
+
+			PHPhotoLibrary.shared().performChanges({
+				if let asset = PHAsset.fetchAssets(with: .video, options: nil).lastObject {
+					print("Asset is valid")
+					
+					let enumeration: NSArray = [asset]
+					let _ = PHAssetChangeRequest.deleteAssets(enumeration)
 				}
-			} catch {
-				print("Error")
+			}) { (success, error) in
+				if success {
+					print("WOOO")
+				}
+				
+				if (error != nil) {
+					print("NOOOOOOO")
+				}
 			}
 		} else {
-			fileExists = false
+			print("File does not exist on first load")
 		}
 		
 		if fileExists == false {
