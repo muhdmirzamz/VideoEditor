@@ -184,74 +184,89 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		let fileManager = FileManager.default
 		
-		
-		
-//		let docDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-//		let savePath = docDirectory.path.appending("/mergevideo.mov")
-		
+//		let randPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path.appending("/mergevideo.mov")
 		
 		let randPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path.appending("/mergevideo.mov")
 		let url = NSURL.fileURL(withPath: randPath)
 		
-		print("\n\n")
-		print("URL: \(url)")
-		print("absoluteString: \(url.absoluteString)")
-		print("randPath: \(randPath)")
-		
 		var fileExists = false
 		
-		if fileManager.fileExists(atPath: randPath) {
+		if fileManager.fileExists(atPath: url.path) {
 			
-			print("File exists!")
-			
+			print("File exists")
 			fileExists = true
-
+			
+			do {
+				try fileManager.removeItem(atPath: url.path)
+			} catch {
+				print("Yo failed to remove")
+			}
+			
 			PHPhotoLibrary.shared().performChanges({
-				if let asset = PHAsset.fetchAssets(with: .video, options: nil).lastObject {
-					print("Asset is valid")
+				let fetchOptions = PHFetchOptions()
+				fetchOptions.predicate = NSPredicate(format: "title == %@", "Hello")
+				
+				if let assetCollection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions).firstObject {
+					let assets = PHAsset.fetchAssets(in: assetCollection, options: nil)
 					
-					let enumeration: NSArray = [asset]
-					let _ = PHAssetChangeRequest.deleteAssets(enumeration)
+					assets.enumerateObjects({ (asset, i, stop) in
+						let enumeration: NSArray = [asset]
+						let _ = PHAssetChangeRequest.deleteAssets(enumeration)
+						
+						fileExists = false
+						
+						print("Album does exist")
+					})
+				} else {
+					// if album itself does not exist
+					fileExists = false
+					print("Album does not exist")
+					print("File exists bool: \(fileExists)")
 				}
 			}) { (success, error) in
 				if success {
-					print("WOOO")
-				}
-				
-				if (error != nil) {
-					print("NOOOOOOO")
+					if fileExists == false {
+						print("Going to exporter")
+						
+						self.exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
+						self.exporter?.outputURL = url
+						self.exporter?.outputFileType = AVFileType.mov
+						self.exporter?.videoComposition = mainComposition
+						self.exporter?.exportAsynchronously(completionHandler: {
+							DispatchQueue.main.async {
+								self.exportDidFinish(session: self.exporter!)
+							}
+						})
+					}
 				}
 			}
 		} else {
 			print("File does not exist on first load")
 		}
-		
-		if fileExists == false {
-			self.exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
-			self.exporter?.outputURL = url
-			self.exporter?.outputFileType = AVFileType.mov
-			self.exporter?.videoComposition = mainComposition
-			self.exporter?.exportAsynchronously(completionHandler: {
-				DispatchQueue.main.async {
-					self.exportDidFinish(session: self.exporter!)
-				}
-			})
-		}
 	}
 	
 	func exportDidFinish(session: AVAssetExportSession) {
-		print("Session status: \(session.status.rawValue)")
-		
 		if session.status == .completed {
 			print("Completed")
 			
 			let outputURL = session.outputURL
 			
-			if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum((outputURL?.path)!) {
-				let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
-				let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
-					UISaveVideoAtPathToSavedPhotosAlbum((outputURL?.path)!, nil, nil, nil)
+			PHPhotoLibrary.shared().performChanges({
+				let fetchOptions = PHFetchOptions()
+				fetchOptions.predicate = NSPredicate(format: "title == %@", "Hello")
+				
+				if let assetCollection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions).firstObject {
+					let creationReq = PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: outputURL!)
+					let assetAddReq = PHAssetCollectionChangeRequest.init(for: assetCollection)
+					assetAddReq?.addAssets([(creationReq?.placeholderForCreatedAsset)!] as NSArray)
+				} else {
+					let creationReq = PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: outputURL!)
+					let assetAddReq = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "Hello")
+					assetAddReq.addAssets([(creationReq?.placeholderForCreatedAsset)!] as NSArray)
 				}
+			}) { (success, error) in
+				let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
+				let okAction = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
 				
 				alertController.addAction(okAction)
 				
@@ -262,13 +277,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		if session.status == .failed {
 			print("Failed")
 			
+			print("Error: \(session.error)")
+			
 			let alertController = UIAlertController.init(title: "Failed", message: "", preferredStyle: .alert)
 			let okAction = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
 			
 			alertController.addAction(okAction)
 			
 			self.present(alertController, animated: true, completion: nil)
-			// might want to prompt user to retry saving since there is sort of like a null pointer bug case scenario we are dealing with here
 		}
 	}
 	
