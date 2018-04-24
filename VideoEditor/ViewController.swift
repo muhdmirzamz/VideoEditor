@@ -21,6 +21,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	var firstAsset: AVAsset?
 	var secondAsset: AVAsset?
 	
+	var assetsArr = [AVAsset]()
+	
 	var exporter: AVAssetExportSession?
 	
 	override func viewDidLoad() {
@@ -62,13 +64,30 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	@IBAction func loadFirstAsset() {
 		self.loadingAsset = true
 		
-		let imagePicker = UIImagePickerController()
-		imagePicker.allowsEditing = true
-		imagePicker.delegate = self
-		imagePicker.sourceType = .photoLibrary
-		imagePicker.mediaTypes = [kUTTypeMovie as String]
+		let alert = UIAlertController.init(title: "", message: "", preferredStyle: .actionSheet)
+		let cameraOption = UIAlertAction.init(title: "Camera", style: .default) { (action) in
+			let imagePicker = UIImagePickerController()
+			imagePicker.allowsEditing = true
+			imagePicker.delegate = self
+			imagePicker.sourceType = .camera
+			imagePicker.mediaTypes = [kUTTypeMovie as String]
+			
+			self.present(imagePicker, animated: true, completion: nil)
+		}
+		let libraryOption = UIAlertAction.init(title: "Photo Library", style: .default) { (action) in
+			let imagePicker = UIImagePickerController()
+			imagePicker.sourceType = .photoLibrary
+			imagePicker.allowsEditing = true
+			imagePicker.delegate = self
+			imagePicker.mediaTypes = [kUTTypeMovie as String]
+			
+			self.present(imagePicker, animated: true, completion: nil)
+		}
 		
-		self.present(imagePicker, animated: true, completion: nil)
+		alert.addAction(cameraOption)
+		alert.addAction(libraryOption)
+		
+		self.present(alert, animated: true, completion: nil)
 	}
 	
 	@IBAction func loadSecondAsset() {
@@ -82,6 +101,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	}
 	
 	public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+		let mediaInfo = info[UIImagePickerControllerMediaType] as! String
+		
+		if mediaInfo == kUTTypeMovie as String {
+			let assetURL = info[UIImagePickerControllerMediaURL] as! URL
+			let asset = AVAsset.init(url: assetURL)
+			self.assetsArr.append(asset)
+		}
+		
 		if self.loadingAsset {
 			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
 			
@@ -183,8 +210,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		
 		let fileManager = FileManager.default
-		
-//		let randPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path.appending("/mergevideo.mov")
 		
 		let randPath = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].path.appending("/mergevideo.mov")
 		let url = NSURL.fileURL(withPath: randPath)
