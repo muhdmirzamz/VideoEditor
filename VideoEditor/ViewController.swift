@@ -64,7 +64,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	@IBAction func loadFirstAsset() {
 		self.loadingAsset = true
 		
-		let alert = UIAlertController.init(title: "", message: "", preferredStyle: .actionSheet)
+		let alert = UIAlertController.init(title: "Choose media", message: "", preferredStyle: .actionSheet)
 		let cameraOption = UIAlertAction.init(title: "Camera", style: .default) { (action) in
 			let imagePicker = UIImagePickerController()
 			imagePicker.allowsEditing = true
@@ -107,66 +107,75 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			let assetURL = info[UIImagePickerControllerMediaURL] as! URL
 			let asset = AVAsset.init(url: assetURL)
 			self.assetsArr.append(asset)
-		}
-		
-		if self.loadingAsset {
-			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
 			
-			if self.firstAssetLoaded {
-				if mediaInfo == kUTTypeMovie as String {
-					self.secondAsset = AVAsset.init(url: info[UIImagePickerControllerMediaURL] as! URL)
-					
-					if let firstAsset = self.firstAsset, let secondAsset = self.secondAsset {
-						let alertController = UIAlertController.init(title: "Successfully loaded both assets", message: "", preferredStyle: .alert)
-						let okAction = UIAlertAction.init(title: "OK", style: .default, handler: nil)
-						
-						alertController.addAction(okAction)
-						
-						self.dismiss(animated: true) {
-							self.present(alertController, animated: true, completion: nil)
-						}
-					}
-				}
-			} else {
-				if mediaInfo == kUTTypeMovie as String {
-					self.firstAsset = AVAsset.init(url: info[UIImagePickerControllerMediaURL] as! URL)
-					
-					self.firstAssetLoaded = true
-					
-					self.dismiss(animated: true, completion: nil)
-				}
-			}
-		} else if self.takingVideo {
-			let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
+			let alertController = UIAlertController.init(title: "\(self.assetsArr.count) assets loaded", message: "", preferredStyle: .alert)
+			let okAction = UIAlertAction.init(title: "OK", style: .default, handler: nil)
+			
+			alertController.addAction(okAction)
 			
 			self.dismiss(animated: true) {
-				if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(mediaURL.path) {
-					let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
-					let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
-						UISaveVideoAtPathToSavedPhotosAlbum(mediaURL.path, nil, nil, nil)
-					}
-					
-					alertController.addAction(okAction)
-					
-					self.present(alertController, animated: true, completion: nil)
-				}
-			}
-		} else {
-			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
-			
-			if mediaInfo == kUTTypeMovie as String {
-				self.dismiss(animated: true) {
-					let url = info[UIImagePickerControllerMediaURL] as! URL
-					let avPlayer = AVPlayer.init(url: url)
-					let avPlayerVC = AVPlayerViewController()
-					avPlayerVC.player = avPlayer
-					
-					self.present(avPlayerVC, animated: true, completion: nil)
-					
-					avPlayer.play()
-				}
+				self.present(alertController, animated: true, completion: nil)
 			}
 		}
+		
+//		if self.loadingAsset {
+//			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
+//
+//			if self.firstAssetLoaded {
+//				if mediaInfo == kUTTypeMovie as String {
+//					self.secondAsset = AVAsset.init(url: info[UIImagePickerControllerMediaURL] as! URL)
+//
+//					if let firstAsset = self.firstAsset, let secondAsset = self.secondAsset {
+//						let alertController = UIAlertController.init(title: "Successfully loaded both assets", message: "", preferredStyle: .alert)
+//						let okAction = UIAlertAction.init(title: "OK", style: .default, handler: nil)
+//
+//						alertController.addAction(okAction)
+//
+//						self.dismiss(animated: true) {
+//							self.present(alertController, animated: true, completion: nil)
+//						}
+//					}
+//				}
+//			} else {
+//				if mediaInfo == kUTTypeMovie as String {
+//					self.firstAsset = AVAsset.init(url: info[UIImagePickerControllerMediaURL] as! URL)
+//
+//					self.firstAssetLoaded = true
+//
+//					self.dismiss(animated: true, completion: nil)
+//				}
+//			}
+//		} else if self.takingVideo {
+//			let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
+//
+//			self.dismiss(animated: true) {
+//				if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(mediaURL.path) {
+//					let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
+//					let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
+//						UISaveVideoAtPathToSavedPhotosAlbum(mediaURL.path, nil, nil, nil)
+//					}
+//
+//					alertController.addAction(okAction)
+//
+//					self.present(alertController, animated: true, completion: nil)
+//				}
+//			}
+//		} else {
+//			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
+//
+//			if mediaInfo == kUTTypeMovie as String {
+//				self.dismiss(animated: true) {
+//					let url = info[UIImagePickerControllerMediaURL] as! URL
+//					let avPlayer = AVPlayer.init(url: url)
+//					let avPlayerVC = AVPlayerViewController()
+//					avPlayerVC.player = avPlayer
+//
+//					self.present(avPlayerVC, animated: true, completion: nil)
+//
+//					avPlayer.play()
+//				}
+//			}
+//		}
 	}
 	
 	public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -175,6 +184,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	@IBAction func merge() {
 		let mixComposition = AVMutableComposition()
+		
+		for asset in self.assetsArr {
+			let firstTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+			do {
+				try firstTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, asset.duration), of: asset.tracks(withMediaType: .video)[0], at: kCMTimeZero)
+			} catch {
+				print("Failed to load first track")
+			}
+		}
+		
 		
 		let firstTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 		do {
