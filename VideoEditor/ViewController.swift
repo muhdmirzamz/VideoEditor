@@ -185,46 +185,94 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	@IBAction func merge() {
 		let mixComposition = AVMutableComposition()
 		
-		for asset in self.assetsArr {
-			let firstTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-			do {
-				try firstTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, asset.duration), of: asset.tracks(withMediaType: .video)[0], at: kCMTimeZero)
-			} catch {
-				print("Failed to load first track")
+		var tracks = [AVMutableCompositionTrack]()
+		
+		for i in 0 ..< self.assetsArr.count {
+			if i == 0 {
+				let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+				do {
+					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: kCMTimeZero)
+					
+					tracks.append(track!)
+				} catch {
+					print("Failed to load first track")
+				}
+			} else {
+				let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+				do {
+					let prevTrack = self.assetsArr[i - 1]
+					
+					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: prevTrack.duration)
+					
+					tracks.append(track!)
+				} catch {
+					print("Failed to load track \(i)")
+				}
 			}
 		}
 		
+		let mainInstruction = AVMutableVideoCompositionInstruction()
 		
-		let firstTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-		do {
-			try firstTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, (self.firstAsset?.duration)!), of: (firstAsset?.tracks(withMediaType: .video)[0])!, at: kCMTimeZero)
-		} catch {
-			print("Failed to load first track")
+		var time: CMTime?
+		for i in 0 ..< self.assetsArr.count {
+			// array count = 10
+			// 8 <- it should stop
+			// stop at the last pair of iteration
+			if i <= self.assetsArr.count - 2 {
+				// this is index 8 and 9
+				time = CMTimeAdd(self.assetsArr[i].duration, self.assetsArr[i + 1].duration)
+			}
 		}
 		
-		let secondTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-		do {
-			try secondTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, (self.secondAsset?.duration)!), of: (secondAsset?.tracks(withMediaType: .video)[0])!, at: (firstAsset?.duration)!)
-		} catch {
-			print("Failed to load first track")
+		if let time = time {
+			mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, time)
 		}
 		
+		var layerInstructions = [AVVideoCompositionLayerInstruction]()
+		
+		for i in 0 ..< self.assetsArr.count {
+			let instruction = videoCompositionInstructionForTrack(track: tracks[i], asset: self.assetsArr[i])
+			
+			if i == 0 {
+				instruction.setOpacity(0.0, at: self.assetsArr[i].duration)
+			}
+			
+			layerInstructions.append(instruction)
+		}
 		
 		// 2.1
-		let mainInstruction = AVMutableVideoCompositionInstruction()
-		mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeAdd((firstAsset?.duration)!, (secondAsset?.duration)!))
+//		let mainInstruction = AVMutableVideoCompositionInstruction()
+//		mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeAdd((firstAsset?.duration)!, (secondAsset?.duration)!))
 		
 		// 2.2
-		let firstInstruction = videoCompositionInstructionForTrack(track: firstTrack!, asset: firstAsset!)
-		firstInstruction.setOpacity(0.0, at: (firstAsset?.duration)!)
-		let secondInstruction = videoCompositionInstructionForTrack(track: secondTrack!, asset: secondAsset!)
+//		let firstInstruction = videoCompositionInstructionForTrack(track: firstTrack!, asset: firstAsset!)
+//		firstInstruction.setOpacity(0.0, at: (firstAsset?.duration)!)
+//		let secondInstruction = videoCompositionInstructionForTrack(track: secondTrack!, asset: secondAsset!)
 		
 		// 2.3
-		mainInstruction.layerInstructions = [firstInstruction, secondInstruction]
+		mainInstruction.layerInstructions = layerInstructions
 		let mainComposition = AVMutableVideoComposition()
 		mainComposition.instructions = [mainInstruction]
 		mainComposition.frameDuration = CMTimeMake(1, 30)
 		mainComposition.renderSize = CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
+		
+		
+//		let firstTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+//		do {
+//			try firstTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, (self.firstAsset?.duration)!), of: (firstAsset?.tracks(withMediaType: .video)[0])!, at: kCMTimeZero)
+//		} catch {
+//			print("Failed to load first track")
+//		}
+//
+//		let secondTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+//		do {
+//			try secondTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, (self.secondAsset?.duration)!), of: (secondAsset?.tracks(withMediaType: .video)[0])!, at: (firstAsset?.duration)!)
+//		} catch {
+//			print("Failed to load first track")
+//		}
+		
+		
+		
 		
 		
 		
@@ -241,6 +289,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			fileExists = true
 			
 			do {
+				print("Im here")
+				
 				try fileManager.removeItem(atPath: url.path)
 			} catch {
 				print("Yo failed to remove")
@@ -250,17 +300,29 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				let fetchOptions = PHFetchOptions()
 				fetchOptions.predicate = NSPredicate(format: "title == %@", "Hello")
 				
+				print("Im in perform changes")
+				
 				if let assetCollection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions).firstObject {
+				
+					print("Im in fetch asset collections")
+					
 					let assets = PHAsset.fetchAssets(in: assetCollection, options: nil)
 					
-					assets.enumerateObjects({ (asset, i, stop) in
-						let enumeration: NSArray = [asset]
-						let _ = PHAssetChangeRequest.deleteAssets(enumeration)
-						
+					if assets.count > 0 {
+						// if there is nothing in the album, it won't go here
+						assets.enumerateObjects({ (asset, i, stop) in
+							print("Im in enumerate")
+							
+							let enumeration: NSArray = [asset]
+							let _ = PHAssetChangeRequest.deleteAssets(enumeration)
+							
+							fileExists = false
+							
+							print("Album does exist")
+						})
+					} else {
 						fileExists = false
-						
-						print("Album does exist")
-					})
+					}
 				} else {
 					// if album itself does not exist
 					fileExists = false
@@ -283,9 +345,27 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 						})
 					}
 				}
+				
+				if (error != nil) {
+					print("This is the error \(error)")
+				}
 			}
 		} else {
 			print("File does not exist on first load")
+			
+			if fileExists == false {
+				print("Going to exporter")
+				
+				self.exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
+				self.exporter?.outputURL = url
+				self.exporter?.outputFileType = AVFileType.mov
+				self.exporter?.videoComposition = mainComposition
+				self.exporter?.exportAsynchronously(completionHandler: {
+					DispatchQueue.main.async {
+						self.exportDidFinish(session: self.exporter!)
+					}
+				})
+			}
 		}
 	}
 	
