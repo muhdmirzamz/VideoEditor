@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ygK-TL-ib5">
-                                <rect key="frame" x="165" y="570" width="44" height="30"/>
+                                <rect key="frame" x="267" y="579" width="44" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Merge"/>
                                 <connections>
@@ -27,35 +27,11 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ded-xf-jzF">
-                                <rect key="frame" x="39" y="510" width="105" height="30"/>
+                                <rect key="frame" x="59" y="579" width="75" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Load first asset"/>
+                                <state key="normal" title="Load video"/>
                                 <connections>
-                                    <action selector="loadFirstAsset" destination="BYZ-38-t0r" eventType="touchUpInside" id="hEJ-vS-pgA"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cBV-58-Jb7">
-                                <rect key="frame" x="211" y="510" width="129" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Load second asset"/>
-                                <connections>
-                                    <action selector="loadSecondAsset" destination="BYZ-38-t0r" eventType="touchUpInside" id="y8e-EV-zkg"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6fa-n5-Uox">
-                                <rect key="frame" x="114" y="83" width="147" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Select and play video"/>
-                                <connections>
-                                    <action selector="selectAndPlayVideo" destination="BYZ-38-t0r" eventType="touchUpInside" id="Sxq-ZX-sgD"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="37b-0r-eFh">
-                                <rect key="frame" x="118" y="264" width="138" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Take and save video"/>
-                                <connections>
-                                    <action selector="takeAndSaveVideo" destination="BYZ-38-t0r" eventType="touchUpInside" id="cRz-gF-hDd"/>
+                                    <action selector="loadVideo" destination="BYZ-38-t0r" eventType="touchUpInside" id="rTS-sI-525"/>
                                 </connections>
                             </button>
                         </subviews>

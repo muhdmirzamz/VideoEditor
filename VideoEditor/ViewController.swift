@@ -37,31 +37,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		// Dispose of any resources that can be recreated.
 	}
 	
-	@IBAction func selectAndPlayVideo() {
-		self.takingVideo = false
-		
-		let imagePicker = UIImagePickerController()
-		imagePicker.allowsEditing = true
-		imagePicker.delegate = self
-		imagePicker.sourceType = .photoLibrary
-		imagePicker.mediaTypes = [kUTTypeMovie as String]
-		
-		self.present(imagePicker, animated: true, completion: nil)
-	}
-	
-	@IBAction func takeAndSaveVideo() {
-		self.takingVideo = true
-		
-		let imagePicker = UIImagePickerController()
-		imagePicker.allowsEditing = true
-		imagePicker.delegate = self
-		imagePicker.sourceType = .camera
-		imagePicker.mediaTypes = [kUTTypeMovie as String]
-		
-		self.present(imagePicker, animated: true, completion: nil)
-	}
-	
-	@IBAction func loadFirstAsset() {
+	@IBAction func loadVideo() {
 		self.loadingAsset = true
 		
 		let alert = UIAlertController.init(title: "Choose media", message: "", preferredStyle: .actionSheet)
@@ -90,16 +66,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		self.present(alert, animated: true, completion: nil)
 	}
 	
-	@IBAction func loadSecondAsset() {
-		let imagePicker = UIImagePickerController()
-		imagePicker.allowsEditing = true
-		imagePicker.delegate = self
-		imagePicker.sourceType = .photoLibrary
-		imagePicker.mediaTypes = [kUTTypeMovie as String]
-		
-		self.present(imagePicker, animated: true, completion: nil)
-	}
-	
 	public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
 		let mediaInfo = info[UIImagePickerControllerMediaType] as! String
 		
@@ -108,13 +74,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			let asset = AVAsset.init(url: assetURL)
 			self.assetsArr.append(asset)
 			
-			let alertController = UIAlertController.init(title: "\(self.assetsArr.count) assets loaded", message: "", preferredStyle: .alert)
-			let okAction = UIAlertAction.init(title: "OK", style: .default, handler: nil)
-			
-			alertController.addAction(okAction)
-			
 			self.dismiss(animated: true) {
-				self.present(alertController, animated: true, completion: nil)
+				let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
+				imageAssetGenerator.appliesPreferredTrackTransform = true
+				
+				do {
+					let imageRef = try imageAssetGenerator.copyCGImage(at: kCMTimeZero, actualTime: nil)
+					
+					let image = UIImage.init(cgImage: imageRef)
+					let imageView = UIImageView.init(image: image)
+					imageView.frame = CGRect.init(x: 20, y: 20, width: 150, height: 150)
+					
+					self.view.addSubview(imageView)
+				} catch {
+					print("Error image generation")
+				}
 			}
 		}
 		
