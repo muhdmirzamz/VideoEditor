@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AAE97670209DE78B00F0571D /* ImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE9766F209DE78B00F0571D /* ImageCollectionViewCell.swift */; };
 		AAF5A30B2021E556003CFC92 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF5A30A2021E556003CFC92 /* AppDelegate.swift */; };
 		AAF5A30D2021E556003CFC92 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAF5A30C2021E556003CFC92 /* ViewController.swift */; };
 		AAF5A3102021E556003CFC92 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AAF5A30E2021E556003CFC92 /* Main.storyboard */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AAE9766F209DE78B00F0571D /* ImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCollectionViewCell.swift; sourceTree = "<group>"; };
 		AAF5A3072021E556003CFC92 /* VideoEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAF5A30A2021E556003CFC92 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AAF5A30C2021E556003CFC92 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -56,6 +58,7 @@
 			children = (
 				AAF5A30A2021E556003CFC92 /* AppDelegate.swift */,
 				AAF5A30C2021E556003CFC92 /* ViewController.swift */,
+				AAE9766F209DE78B00F0571D /* ImageCollectionViewCell.swift */,
 				AAF5A30E2021E556003CFC92 /* Main.storyboard */,
 				AAF5A3112021E556003CFC92 /* Assets.xcassets */,
 				AAF5A3132021E556003CFC92 /* LaunchScreen.storyboard */,
@@ -136,6 +139,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AAE97670209DE78B00F0571D /* ImageCollectionViewCell.swift in Sources */,
 				AAF5A30D2021E556003CFC92 /* ViewController.swift in Sources */,
 				AAF5A30B2021E556003CFC92 /* AppDelegate.swift in Sources */,
 			);

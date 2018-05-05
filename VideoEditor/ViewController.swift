@@ -12,7 +12,7 @@ import AVFoundation
 import AVKit
 import Photos
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
 	var takingVideo = false
 	var loadingAsset = false
@@ -23,11 +23,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	var assetsArr = [AVAsset]()
 	
+	@IBOutlet var collectionView: UICollectionView!
+	
 	var exporter: AVAssetExportSession?
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
+		
+		self.collectionView.delegate = self
+		self.collectionView.dataSource = self
 		
 		try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: [])
 	}
@@ -75,20 +80,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			self.assetsArr.append(asset)
 			
 			self.dismiss(animated: true) {
-				let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
-				imageAssetGenerator.appliesPreferredTrackTransform = true
-				
-				do {
-					let imageRef = try imageAssetGenerator.copyCGImage(at: kCMTimeZero, actualTime: nil)
-					
-					let image = UIImage.init(cgImage: imageRef)
-					let imageView = UIImageView.init(image: image)
-					imageView.frame = CGRect.init(x: 20, y: 20, width: 150, height: 150)
-					
-					self.view.addSubview(imageView)
-				} catch {
-					print("Error image generation")
-				}
+				self.collectionView.reloadData()
 			}
 		}
 		
@@ -434,6 +426,46 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			assetOrientation = .down
 		}
 		return (assetOrientation, isPortrait)
+	}
+	
+	
+	
+	public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+		return self.assetsArr.count
+	}
+	
+	public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+		let cell = self.collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? ImageCollectionViewCell
+		
+		let asset = self.assetsArr[indexPath.row]
+		
+		let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
+		imageAssetGenerator.appliesPreferredTrackTransform = true
+		
+		do {
+			let imageRef = try imageAssetGenerator.copyCGImage(at: kCMTimeZero, actualTime: nil)
+			
+			let image = UIImage.init(cgImage: imageRef)
+			cell?.imageView.image = image
+
+			if let cell = cell {
+				print("Cell is goof to go")
+				
+				if let image = cell.imageView.image {
+					print("image is goof to go")
+				}
+			}
+			
+		} catch {
+			print("Error image generation")
+		}
+		
+		return cell!
+	}
+	
+	
+	public func numberOfSections(in collectionView: UICollectionView) -> Int {
+		return 1
 	}
 }
 
