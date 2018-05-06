@@ -152,46 +152,63 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		let mixComposition = AVMutableComposition()
 		
 		var tracks = [AVMutableCompositionTrack]()
+
+		var initialDuration: CMTime?
+		var duration: CMTime?
 		
 		for i in 0 ..< self.assetsArr.count {
 			if i == 0 {
+				print("I is 0")
+				
 				let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 				do {
 					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: kCMTimeZero)
+					
+					initialDuration = kCMTimeZero + self.assetsArr[i].duration
 					
 					tracks.append(track!)
 				} catch {
 					print("Failed to load first track")
 				}
 			} else {
+				print("I is \(i)")
+				
 				let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 				do {
-					let prevTrack = self.assetsArr[i - 1]
+					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: initialDuration!)
 					
-					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: prevTrack.duration)
+					duration = initialDuration! + self.assetsArr[i].duration
+					initialDuration = duration
 					
 					tracks.append(track!)
 				} catch {
 					print("Failed to load track \(i)")
 				}
 			}
+			
+			print("Composition duration: \(mixComposition.duration.seconds)")
 		}
 		
 		let mainInstruction = AVMutableVideoCompositionInstruction()
 		
 		var time: CMTime?
+		var initialTime: CMTime?
 		for i in 0 ..< self.assetsArr.count {
 			// array count = 10
 			// 8 <- it should stop
 			// stop at the last pair of iteration
-			if i <= self.assetsArr.count - 2 {
-				// this is index 8 and 9
-				time = CMTimeAdd(self.assetsArr[i].duration, self.assetsArr[i + 1].duration)
+			
+			if i == 0 {
+				initialTime = CMTimeAdd(kCMTimeZero, self.assetsArr[i].duration)
+			} else {
+				time = initialTime! + self.assetsArr[i].duration
+				initialTime = time
 			}
 		}
-		
+
 		if let time = time {
 			mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, time)
+			print("duration: \(time.seconds)")
 		}
 		
 		var layerInstructions = [AVVideoCompositionLayerInstruction]()
@@ -206,6 +223,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			layerInstructions.append(instruction)
 		}
 		
+		print("Assets: \(self.assetsArr.count)")
+		print("layer instructions: \(layerInstructions.count)")
+		
 		// 2.1
 //		let mainInstruction = AVMutableVideoCompositionInstruction()
 //		mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeAdd((firstAsset?.duration)!, (secondAsset?.duration)!))
@@ -219,7 +239,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		mainInstruction.layerInstructions = layerInstructions
 		let mainComposition = AVMutableVideoComposition()
 		mainComposition.instructions = [mainInstruction]
-		mainComposition.frameDuration = CMTimeMake(1, 30)
+		mainComposition.frameDuration = CMTime.init(value: 1, timescale: 30)
 		mainComposition.renderSize = CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
 		
 		
