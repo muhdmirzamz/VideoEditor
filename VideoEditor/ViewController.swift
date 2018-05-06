@@ -194,10 +194,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		var time: CMTime?
 		var initialTime: CMTime?
 		for i in 0 ..< self.assetsArr.count {
-			// array count = 10
-			// 8 <- it should stop
-			// stop at the last pair of iteration
-			
 			if i == 0 {
 				initialTime = CMTimeAdd(kCMTimeZero, self.assetsArr[i].duration)
 			} else {
@@ -213,11 +209,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		var layerInstructions = [AVVideoCompositionLayerInstruction]()
 		
+		var initialAssetDuration = kCMTimeZero
+		var assetDuration: CMTime?
+		
 		for i in 0 ..< self.assetsArr.count {
 			let instruction = videoCompositionInstructionForTrack(track: tracks[i], asset: self.assetsArr[i])
 			
-			if i == 0 {
-				instruction.setOpacity(0.0, at: self.assetsArr[i].duration)
+			assetDuration = initialAssetDuration + self.assetsArr[i].duration
+			initialAssetDuration = assetDuration!
+			
+			if i < self.assetsArr.count {
+				instruction.setOpacity(0.0, at: initialAssetDuration)
 			}
 			
 			layerInstructions.append(instruction)
