@@ -42,25 +42,26 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		// Dispose of any resources that can be recreated.
 	}
 	
+	
+	
+	
+	
 	@IBAction func loadVideo() {
 		self.loadingAsset = true
 		
+		let imagePicker = UIImagePickerController()
+		imagePicker.delegate = self
+		imagePicker.allowsEditing = true
+		imagePicker.mediaTypes = [kUTTypeMovie as String]
+		
 		let alert = UIAlertController.init(title: "Choose media", message: "", preferredStyle: .actionSheet)
 		let cameraOption = UIAlertAction.init(title: "Camera", style: .default) { (action) in
-			let imagePicker = UIImagePickerController()
-			imagePicker.allowsEditing = true
-			imagePicker.delegate = self
 			imagePicker.sourceType = .camera
-			imagePicker.mediaTypes = [kUTTypeMovie as String]
 			
 			self.present(imagePicker, animated: true, completion: nil)
 		}
 		let libraryOption = UIAlertAction.init(title: "Photo Library", style: .default) { (action) in
-			let imagePicker = UIImagePickerController()
 			imagePicker.sourceType = .photoLibrary
-			imagePicker.allowsEditing = true
-			imagePicker.delegate = self
-			imagePicker.mediaTypes = [kUTTypeMovie as String]
 			
 			self.present(imagePicker, animated: true, completion: nil)
 		}
@@ -83,65 +84,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				self.collectionView.reloadData()
 			}
 		}
-		
-//		if self.loadingAsset {
-//			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
-//
-//			if self.firstAssetLoaded {
-//				if mediaInfo == kUTTypeMovie as String {
-//					self.secondAsset = AVAsset.init(url: info[UIImagePickerControllerMediaURL] as! URL)
-//
-//					if let firstAsset = self.firstAsset, let secondAsset = self.secondAsset {
-//						let alertController = UIAlertController.init(title: "Successfully loaded both assets", message: "", preferredStyle: .alert)
-//						let okAction = UIAlertAction.init(title: "OK", style: .default, handler: nil)
-//
-//						alertController.addAction(okAction)
-//
-//						self.dismiss(animated: true) {
-//							self.present(alertController, animated: true, completion: nil)
-//						}
-//					}
-//				}
-//			} else {
-//				if mediaInfo == kUTTypeMovie as String {
-//					self.firstAsset = AVAsset.init(url: info[UIImagePickerControllerMediaURL] as! URL)
-//
-//					self.firstAssetLoaded = true
-//
-//					self.dismiss(animated: true, completion: nil)
-//				}
-//			}
-//		} else if self.takingVideo {
-//			let mediaURL = info[UIImagePickerControllerMediaURL] as! URL
-//
-//			self.dismiss(animated: true) {
-//				if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(mediaURL.path) {
-//					let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
-//					let okAction = UIAlertAction.init(title: "Ok", style: .default) { (action) in
-//						UISaveVideoAtPathToSavedPhotosAlbum(mediaURL.path, nil, nil, nil)
-//					}
-//
-//					alertController.addAction(okAction)
-//
-//					self.present(alertController, animated: true, completion: nil)
-//				}
-//			}
-//		} else {
-//			let mediaInfo = info[UIImagePickerControllerMediaType] as! String
-//
-//			if mediaInfo == kUTTypeMovie as String {
-//				self.dismiss(animated: true) {
-//					let url = info[UIImagePickerControllerMediaURL] as! URL
-//					let avPlayer = AVPlayer.init(url: url)
-//					let avPlayerVC = AVPlayerViewController()
-//					avPlayerVC.player = avPlayer
-//
-//					self.present(avPlayerVC, animated: true, completion: nil)
-//
-//					avPlayer.play()
-//				}
-//			}
-//		}
 	}
 	
 	public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
