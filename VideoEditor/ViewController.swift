@@ -13,13 +13,6 @@ import AVKit
 import Photos
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-
-	var takingVideo = false
-	var loadingAsset = false
-	var firstAssetLoaded = false
-	
-	var firstAsset: AVAsset?
-	var secondAsset: AVAsset?
 	
 	var assetsArr = [AVAsset]()
 	
@@ -47,8 +40,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	
 	@IBAction func loadVideo() {
-		self.loadingAsset = true
-		
 		let imagePicker = UIImagePickerController()
 		imagePicker.delegate = self
 		imagePicker.allowsEditing = true
@@ -90,6 +81,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		self.dismiss(animated: true, completion: nil)
 	}
 	
+	
+	
+	
+	
+	
+	
+	
 	@IBAction func merge() {
 		let mixComposition = AVMutableComposition()
 		
@@ -99,35 +97,23 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		var duration: CMTime?
 		
 		for i in 0 ..< self.assetsArr.count {
+			let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
+			
 			if i == 0 {
-				print("I is 0")
-				
-				let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-				do {
-					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: kCMTimeZero)
-					
-					initialDuration = kCMTimeZero + self.assetsArr[i].duration
-					
-					tracks.append(track!)
-				} catch {
-					print("Failed to load first track")
-				}
-			} else {
-				print("I is \(i)")
-				
-				let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-				do {
-					try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: initialDuration!)
-					
-					duration = initialDuration! + self.assetsArr[i].duration
-					initialDuration = duration
-					
-					tracks.append(track!)
-				} catch {
-					print("Failed to load track \(i)")
-				}
+				initialDuration = kCMTimeZero
 			}
 			
+			do {
+				try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: initialDuration!)
+			} catch {
+				print("Failed to load track")
+			}
+			
+			duration = initialDuration! + self.assetsArr[i].duration
+			initialDuration = duration
+			
+			tracks.append(track!)
+
 			print("Composition duration: \(mixComposition.duration.seconds)")
 		}
 		
