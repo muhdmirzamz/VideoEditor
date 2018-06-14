@@ -15,6 +15,7 @@ import Photos
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 	
 	var assetsArr = [AVAsset]()
+	var assetsURLArr = [URL]()
 	
 	@IBOutlet var collectionView: UICollectionView!
 	
@@ -69,7 +70,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		if mediaInfo == kUTTypeMovie as String {
 			let assetURL = info[UIImagePickerControllerMediaURL] as! URL
 			let asset = AVAsset.init(url: assetURL)
+			
 			self.assetsArr.append(asset)
+			self.assetsURLArr.append(assetURL)
 			
 			self.dismiss(animated: true) {
 				self.collectionView.reloadData()
@@ -156,41 +159,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		print("Assets: \(self.assetsArr.count)")
 		print("layer instructions: \(layerInstructions.count)")
 		
-		// 2.1
-//		let mainInstruction = AVMutableVideoCompositionInstruction()
-//		mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeAdd((firstAsset?.duration)!, (secondAsset?.duration)!))
-		
-		// 2.2
-//		let firstInstruction = videoCompositionInstructionForTrack(track: firstTrack!, asset: firstAsset!)
-//		firstInstruction.setOpacity(0.0, at: (firstAsset?.duration)!)
-//		let secondInstruction = videoCompositionInstructionForTrack(track: secondTrack!, asset: secondAsset!)
-		
-		// 2.3
+
 		mainInstruction.layerInstructions = layerInstructions
 		let mainComposition = AVMutableVideoComposition()
 		mainComposition.instructions = [mainInstruction]
 		mainComposition.frameDuration = CMTime.init(value: 1, timescale: 30)
 		mainComposition.renderSize = CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height)
 		
-		
-//		let firstTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-//		do {
-//			try firstTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, (self.firstAsset?.duration)!), of: (firstAsset?.tracks(withMediaType: .video)[0])!, at: kCMTimeZero)
-//		} catch {
-//			print("Failed to load first track")
-//		}
-//
-//		let secondTrack = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-//		do {
-//			try secondTrack?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, (self.secondAsset?.duration)!), of: (secondAsset?.tracks(withMediaType: .video)[0])!, at: (firstAsset?.duration)!)
-//		} catch {
-//			print("Failed to load first track")
-//		}
-		
-		
-		
-		
-		
+
 		
 		let fileManager = FileManager.default
 		
@@ -397,6 +373,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			
 			let image = UIImage.init(cgImage: imageRef)
 			cell?.imageView.image = image
+			cell?.assetURL = self.assetsURLArr[indexPath.row]
 
 			if let cell = cell {
 				print("Cell is goof to go")
