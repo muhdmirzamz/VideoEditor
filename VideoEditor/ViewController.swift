@@ -12,12 +12,12 @@ import AVFoundation
 import AVKit
 import Photos
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
-	
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, ForwardDataFromCell {
 	var assetsArr = [AVAsset]()
 	var assetsURLArr = [URL]()
 	
 	@IBOutlet var collectionView: UICollectionView!
+	@IBOutlet var mainImageView: UIImageView!
 	
 	var exporter: AVAssetExportSession?
 	
@@ -374,7 +374,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			let image = UIImage.init(cgImage: imageRef)
 			cell?.imageView.image = image
 			cell?.assetURL = self.assetsURLArr[indexPath.row]
-
+			cell?.delegate = self
+			
+			
 			if let cell = cell {
 				print("Cell is goof to go")
 				
@@ -393,6 +395,28 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	public func numberOfSections(in collectionView: UICollectionView) -> Int {
 		return 1
+	}
+	
+	func forwardData(progress: CGFloat, assetURL: URL) {
+		let asset = AVAsset.init(url: assetURL)
+		
+		let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
+		imageAssetGenerator.appliesPreferredTrackTransform = true
+		
+		// TODO convert percentage to timing
+		
+		do {
+			let imageRef = try imageAssetGenerator.copyCGImage(at: kCMTimeZero, actualTime: nil)
+			
+			let image = UIImage.init(cgImage: imageRef)
+			self.mainImageView.image = image
+			
+			if let image = self.mainImageView.image {
+				print("image is goof to go")
+			}
+		} catch {
+			print("Error image generation")
+		}
 	}
 }
 
