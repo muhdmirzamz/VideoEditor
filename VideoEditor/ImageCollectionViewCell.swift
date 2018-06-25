@@ -30,6 +30,7 @@ class ImageCollectionViewCell: UICollectionViewCell {
 			print("Touch location: \((touchLocation?.x)!)")
 			
 			let progress = (touchLocation?.x)! / self.frame.maxX
+			print("progress: \(progress)")
 			
 			self.delegate?.forwardData(progress: progress, assetURL: assetURL!)
 		}

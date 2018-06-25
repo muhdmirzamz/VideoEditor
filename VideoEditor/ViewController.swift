@@ -403,10 +403,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
 		imageAssetGenerator.appliesPreferredTrackTransform = true
 		
-		// TODO convert percentage to timing
+		// example: 0.45 is 45%
+		// there is not a need to divide by 100 again
+		var time = Double(progress) * asset.duration.seconds
+		
+		print("Progress / 100: \(Double(progress / 100))")
+		print("asset duration: \(asset.duration.seconds)")
+		
+		var convertedTime = CMTimeMake(Int64(time), 1)
+
+		print("Time: \(convertedTime.seconds)")
 		
 		do {
-			let imageRef = try imageAssetGenerator.copyCGImage(at: kCMTimeZero, actualTime: nil)
+			let imageRef = try imageAssetGenerator.copyCGImage(at: convertedTime, actualTime: nil)
 			
 			let image = UIImage.init(cgImage: imageRef)
 			self.mainImageView.image = image
