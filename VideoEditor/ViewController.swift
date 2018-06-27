@@ -376,15 +376,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			cell?.assetURL = self.assetsURLArr[indexPath.row]
 			cell?.delegate = self
 			
-			
-			if let cell = cell {
-				print("Cell is goof to go")
-				
-				if let image = cell.imageView.image {
-					print("image is goof to go")
-				}
-			}
-			
 		} catch {
 			print("Error image generation")
 		}
@@ -406,23 +397,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		// example: 0.45 is 45%
 		// there is not a need to divide by 100 again
 		var time = Double(progress) * asset.duration.seconds
-		
-		print("Progress / 100: \(Double(progress / 100))")
-		print("asset duration: \(asset.duration.seconds)")
-		
 		var convertedTime = CMTimeMake(Int64(time), 1)
-
-		print("Time: \(convertedTime.seconds)")
-		
 		do {
 			let imageRef = try imageAssetGenerator.copyCGImage(at: convertedTime, actualTime: nil)
 			
 			let image = UIImage.init(cgImage: imageRef)
 			self.mainImageView.image = image
-			
-			if let image = self.mainImageView.image {
-				print("image is goof to go")
-			}
 		} catch {
 			print("Error image generation")
 		}
