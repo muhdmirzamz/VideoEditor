@@ -8,14 +8,10 @@
 
 import UIKit
 
-protocol ForwardDataFromCell {
-	func forwardData(progress: CGFloat, assetURL: URL)
-}
-
 class ImageCollectionViewCell: UICollectionViewCell {
     @IBOutlet var imageView: UIImageView!
 	var assetURL: URL?
-	var delegate: ForwardDataFromCell?
+	
 	
 //	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 //		let touchLocation = touches.first?.location(in: superview)
@@ -23,17 +19,18 @@ class ImageCollectionViewCell: UICollectionViewCell {
 //		print("diff: \(touchLocation)")
 //	}
 	
-	override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-		let touchLocation = touches.first?.location(in: self)
-		
-		if self.frame.contains(touchLocation!) {
-			print("Touch location: \((touchLocation?.x)!)")
-			
-			let progress = (touchLocation?.x)! / self.frame.maxX
-			
-			self.delegate?.forwardData(progress: progress, assetURL: assetURL!)
-		}
-	}
+//	override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+//		let touchLocation = touches.first?.location(in: self)
+//		
+//		if self.frame.contains(touchLocation!) {
+//			print("Touch location: \((touchLocation?.x)!)")
+//			
+//			let progress = (touchLocation?.x)! / self.frame.maxX
+//			print("progress: \(progress)")
+//			
+//			self.delegate?.forwardData(progress: progress, assetURL: assetURL!)
+//		}
+//	}
 	
 	//	override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
 	//		<#code#>

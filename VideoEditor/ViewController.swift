@@ -12,18 +12,26 @@ import AVFoundation
 import AVKit
 import Photos
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource, ForwardDataFromCell {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 	var assetsArr = [AVAsset]()
 	var assetsURLArr = [URL]()
 	
 	@IBOutlet var collectionView: UICollectionView!
 	@IBOutlet var mainImageView: UIImageView!
 	
+	var scrubber: UIView?
+	
 	var exporter: AVAssetExportSession?
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
+		
+		self.collectionView.backgroundColor = .blue
+		
+		self.scrubber = UIView.init(frame: CGRect.init(x: self.collectionView.frame.origin.x, y: self.collectionView.frame.origin.y - 10, width: 5, height: self.collectionView.frame.size.height + 20))
+		self.scrubber?.backgroundColor = .red
+		self.view.addSubview(self.scrubber!)
 		
 		self.collectionView.delegate = self
 		self.collectionView.dataSource = self
@@ -374,7 +382,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			let image = UIImage.init(cgImage: imageRef)
 			cell?.imageView.image = image
 			cell?.assetURL = self.assetsURLArr[indexPath.row]
-			cell?.delegate = self
+			
 			
 			
 			if let cell = cell {
@@ -397,25 +405,43 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		return 1
 	}
 	
-	func forwardData(progress: CGFloat, assetURL: URL) {
-		let asset = AVAsset.init(url: assetURL)
+	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+		var touchLocation = touches.first?.location(in: self.view)
 		
-		let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
-		imageAssetGenerator.appliesPreferredTrackTransform = true
+		if (self.scrubber?.frame.contains(touchLocation!))! {
+			self.scrubber?.frame.origin.x = (touchLocation?.x)!
+		}
+	}
+	
+	override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+		var touchLocation = touches.first?.location(in: self.view)
 		
-		// TODO convert percentage to timing
+		self.scrubber?.frame.origin.x = (touchLocation?.x)!
 		
-		do {
-			let imageRef = try imageAssetGenerator.copyCGImage(at: kCMTimeZero, actualTime: nil)
+		var videoTimeScrubLocation = self.view.convert(touchLocation!, to: self.collectionView)
+		
+		if let indexPath = self.collectionView.indexPathForItem(at: videoTimeScrubLocation) {
+			let cell = self.collectionView.cellForItem(at: indexPath) as? ImageCollectionViewCell
 			
-			let image = UIImage.init(cgImage: imageRef)
-			self.mainImageView.image = image
+			let progress = videoTimeScrubLocation.x / (cell?.frame.maxX)!
 			
-			if let image = self.mainImageView.image {
-				print("image is goof to go")
+			let asset = AVAsset.init(url: (cell?.assetURL)!)
+			
+			let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
+			imageAssetGenerator.appliesPreferredTrackTransform = true
+			
+			// example: 0.45 is 45%
+			// there is not a need to divide by 100 again
+			let time = Double(progress) * asset.duration.seconds
+			let convertedTime = CMTimeMake(Int64(time), 1)
+			do {
+				let imageRef = try imageAssetGenerator.copyCGImage(at: convertedTime, actualTime: nil)
+				
+				let image = UIImage.init(cgImage: imageRef)
+				self.mainImageView.image = image
+			} catch {
+				print("Error image generation")
 			}
-		} catch {
-			print("Error image generation")
 		}
 	}
 }
