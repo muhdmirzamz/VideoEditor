@@ -384,15 +384,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			cell?.assetURL = self.assetsURLArr[indexPath.row]
 			
 			
-			
-			if let cell = cell {
-				print("Cell is goof to go")
-				
-				if let image = cell.imageView.image {
-					print("image is goof to go")
-				}
-			}
-			
 		} catch {
 			print("Error image generation")
 		}
