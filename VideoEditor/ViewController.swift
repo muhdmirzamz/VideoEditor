@@ -269,6 +269,26 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		}
 	}
 	
+	func cut() {
+		// find out which cell the scrubber is at
+		
+		// get cell
+		
+		// insert same track from cell but range is 0 to cut time
+		
+		// insert same track from cell again but range is cut time to end time
+		
+		// remove original track from array
+		
+		// might wanna remove original track from file manager (if there's a reference)
+		
+		// read the code again but I know that outputURL or session.outputURL is a reference to the trimmed video asset
+		
+		// export that video again and get the trimmed video
+		
+		// insert the trsck from the video
+	}
+	
 	func exportDidFinish(session: AVAssetExportSession) {
 		if session.status == .completed {
 			print("Completed")
