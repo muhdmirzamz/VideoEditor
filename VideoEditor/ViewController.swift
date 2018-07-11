@@ -23,6 +23,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	var exporter: AVAssetExportSession?
 	
+	var scrubbedCell: ImageCollectionViewCell?
+	var scrubbedTimeLocation: CGPoint?
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		// Do any additional setup after loading the view, typically from a nib.
@@ -107,6 +110,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		var initialDuration: CMTime?
 		var duration: CMTime?
 		
+		// adding track
 		for i in 0 ..< self.assetsArr.count {
 			let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 			
@@ -128,6 +132,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			print("Composition duration: \(mixComposition.duration.seconds)")
 		}
 		
+		
+		// adding time
 		let mainInstruction = AVMutableVideoCompositionInstruction()
 		
 		var time: CMTime?
@@ -146,6 +152,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			print("duration: \(time.seconds)")
 		}
 		
+		// set video composition
 		var layerInstructions = [AVVideoCompositionLayerInstruction]()
 		
 		var initialAssetDuration = kCMTimeZero
@@ -269,24 +276,171 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		}
 	}
 	
-	func cut() {
-		// find out which cell the scrubber is at
-		
-		// get cell
-		
-		// insert same track from cell but range is 0 to cut time
-		
-		// insert same track from cell again but range is cut time to end time
-		
-		// remove original track from array
-		
-		// might wanna remove original track from file manager (if there's a reference)
-		
-		// read the code again but I know that outputURL or session.outputURL is a reference to the trimmed video asset
-		
-		// export that video again and get the trimmed video
-		
-		// insert the trsck from the video
+	@IBAction func cut() {
+		// make sure there is a cell to cut
+		if let cell = self.scrubbedCell {
+			let fileManager = FileManager.default
+
+			// create a new directory
+			guard let documentDirectory = try? fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true) else {
+				return
+			}
+
+			let mediaType = "mp4"
+
+			if mediaType == kUTTypeMovie as String || mediaType == "mp4" as String {
+				//			let start = statTime
+				//			let end = endTime
+
+				// create a new directory called "output"
+				// so now you have "originalDir/output"
+				var outputURL = documentDirectory.appendingPathComponent("output")
+				var name = outputURL
+				do {
+					try fileManager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
+					
+					// so now you have "originalDir/output/name.mp4"
+					name = outputURL.appendingPathComponent("cutVideo.mp4")
+				}catch let error {
+					print(error)
+				}
+
+
+				let asset = AVAsset.init(url: cell.assetURL!)
+				var progress = (self.scrubbedTimeLocation?.x)! / cell.frame.maxX
+				
+				var time = Double(progress) * asset.duration.seconds
+				var convertedTime = CMTimeMake(Int64(time), 1)
+				
+				var timeRange = CMTimeRange(start: convertedTime, end: asset.duration)
+				
+				guard var exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {return}
+				exportSession.outputURL = name
+				exportSession.outputFileType = AVFileType.mov
+				exportSession.timeRange = timeRange
+				
+				exportSession.exportAsynchronously {
+					switch exportSession.status {
+					case .completed:
+						let assetURL = name
+						let asset = AVAsset.init(url: assetURL)
+						
+						self.assetsArr.append(asset)
+						self.assetsURLArr.append(assetURL)
+						
+						print("exported at \(name)")
+						
+						if let index = self.assetsURLArr.index(of: cell.assetURL!) {
+							self.assetsArr.remove(at: index)
+							self.assetsURLArr.remove(at: index)
+
+							_ = try? fileManager.removeItem(at: cell.assetURL!)
+
+							DispatchQueue.main.async {
+								self.collectionView.reloadData()
+							}
+						}
+						
+						DispatchQueue.main.async {
+							self.collectionView.reloadData()
+						}
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+//						do {
+//							// do second one
+//							name = outputURL.appendingPathComponent("cutVideo0.mp4")
+//						}catch let error {
+//							print(error)
+//						}
+//
+//						DispatchQueue.main.async {
+//							progress = (self.scrubbedTimeLocation?.x)! / cell.frame.maxX
+//						}
+//						time = Double(progress) * asset.duration.seconds
+//						convertedTime = CMTimeMake(Int64(time), 1)
+//
+//						timeRange = CMTimeRange(start: CMTimeMake(Int64(0), 1), end: convertedTime)
+//
+//						guard let exportSession2 = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {return}
+//						exportSession2.outputURL = name
+//						exportSession2.outputFileType = AVFileType.mov
+//						exportSession2.timeRange = timeRange
+//
+//						exportSession2.exportAsynchronously {
+//							switch exportSession2.status {
+//							case .completed:
+//								let assetURL = outputURL
+//								let asset = AVAsset.init(url: assetURL)
+//
+//								self.assetsArr.append(asset)
+//								self.assetsURLArr.append(assetURL)
+//
+//								print("exported at \(name)")
+//
+////								if let index = self.assetsURLArr.index(of: cell.assetURL!) {
+////									self.assetsArr.remove(at: index)
+////									self.assetsURLArr.remove(at: index)
+////
+////									_ = try? fileManager.removeItem(at: cell.assetURL!)
+////
+////									DispatchQueue.main.async {
+////										self.collectionView.reloadData()
+////									}
+////								}
+//								DispatchQueue.main.async {
+//									self.collectionView.reloadData()
+//								}
+//
+//
+//
+//							case .failed:
+//								print("failed \(exportSession.error)")
+//							case .cancelled:
+//								print("failed \(exportSession.error)")
+//							default:
+//								break
+//							}
+//						}
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+
+						case .failed:
+							print("failed \(exportSession.error)")
+
+						case .cancelled:
+							print("cancelled \(exportSession.error)")
+
+						default: break
+					}
+				}
+				
+
+				
+				
+				
+				
+				
+			}
+		}
 	}
 	
 	func exportDidFinish(session: AVAssetExportSession) {
@@ -425,18 +579,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	}
 	
 	override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-		var touchLocation = touches.first?.location(in: self.view)
+		let touchLocation = touches.first?.location(in: self.view)
 		
 		self.scrubber?.frame.origin.x = (touchLocation?.x)!
 		
-		var videoTimeScrubLocation = self.view.convert(touchLocation!, to: self.collectionView)
+		let videoTimeScrubLocation = self.view.convert(touchLocation!, to: self.collectionView)
+		self.scrubbedTimeLocation = videoTimeScrubLocation
 		
 		if let indexPath = self.collectionView.indexPathForItem(at: videoTimeScrubLocation) {
-			let cell = self.collectionView.cellForItem(at: indexPath) as? ImageCollectionViewCell
+			self.scrubbedCell = self.collectionView.cellForItem(at: indexPath) as? ImageCollectionViewCell
+
+			let progress = videoTimeScrubLocation.x / (self.scrubbedCell?.frame.maxX)!
 			
-			let progress = videoTimeScrubLocation.x / (cell?.frame.maxX)!
-			
-			let asset = AVAsset.init(url: (cell?.assetURL)!)
+			let asset = AVAsset.init(url: (self.scrubbedCell?.assetURL)!)
 			
 			let imageAssetGenerator = AVAssetImageGenerator.init(asset: asset)
 			imageAssetGenerator.appliesPreferredTrackTransform = true
