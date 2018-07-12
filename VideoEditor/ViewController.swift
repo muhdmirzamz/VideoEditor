@@ -307,14 +307,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
 
 				let asset = AVAsset.init(url: cell.assetURL!)
-				var progress = (self.scrubbedTimeLocation?.x)! / cell.frame.maxX
+				let progress = (self.scrubbedTimeLocation?.x)! / cell.frame.maxX
 				
-				var time = Double(progress) * asset.duration.seconds
-				var convertedTime = CMTimeMake(Int64(time), 1)
+				let time = Double(progress) * asset.duration.seconds
+				let convertedTime = CMTimeMake(Int64(time), 1)
 				
-				var timeRange = CMTimeRange(start: convertedTime, end: asset.duration)
+				let timeRange = CMTimeRange(start: convertedTime, end: asset.duration)
 				
-				guard var exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {return}
+				guard let exportSession = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {return}
 				exportSession.outputURL = name
 				exportSession.outputFileType = AVFileType.mov
 				exportSession.timeRange = timeRange
@@ -325,90 +325,94 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 						let assetURL = name
 						let asset = AVAsset.init(url: assetURL)
 						
+						print("First")
+						print("Assets: \(self.assetsArr)")
+						print("Assets count: \(self.assetsArr.count)")
+						print("Assets URL count: \(self.assetsURLArr.count)")
+						
 						self.assetsArr.append(asset)
 						self.assetsURLArr.append(assetURL)
 						
+						print("Assets count: \(self.assetsArr.count)")
+						print("Assets URL count: \(self.assetsURLArr.count)")
+						
+						print("Assets: \(self.assetsArr.description)")
 						print("exported at \(name)")
 						
 						if let index = self.assetsURLArr.index(of: cell.assetURL!) {
 							self.assetsArr.remove(at: index)
 							self.assetsURLArr.remove(at: index)
+							
+							print("Removed at")
+							
+							print("Assets: \(self.assetsArr.description)")
+							print("Assets count: \(self.assetsArr.count)")
+							print("Assets URL count: \(self.assetsURLArr.count)")
 
 							_ = try? fileManager.removeItem(at: cell.assetURL!)
 
-							DispatchQueue.main.async {
-								self.collectionView.reloadData()
+						}
+
+						
+						
+						
+						
+						
+						
+						
+
+						// so now you have "originalDir/output/name.mp4"
+						print("Output url \(outputURL)")
+						name = outputURL.appendingPathComponent("cutVideo0.mp4")
+						print("name \(name)")
+
+						var progress: CGFloat = 0
+						DispatchQueue.main.async {
+							progress = (self.scrubbedTimeLocation?.x)! / cell.frame.maxX
+						}
+						let time = Double(progress) * asset.duration.seconds
+						let convertedTime = CMTimeMake(Int64(time), 1)
+
+						let timeRange = CMTimeRange(start: CMTimeMake(Int64(0), 1), end: convertedTime)
+
+						guard let exportSession2 = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {return}
+						exportSession2.outputURL = name
+						exportSession2.outputFileType = AVFileType.mov
+						exportSession2.timeRange = timeRange
+
+						exportSession2.exportAsynchronously {
+							switch exportSession2.status {
+							case .completed:
+								let assetURL = name
+								let asset = AVAsset.init(url: assetURL)
+
+								print("Second")
+								print("Assets count: \(self.assetsArr.count)")
+								print("Assets URL count: \(self.assetsURLArr.count)")
+								
+								self.assetsArr.append(asset)
+								self.assetsURLArr.append(assetURL)
+
+								print("Assets: \(self.assetsArr.description)")
+								print("Assets count: \(self.assetsArr.count)")
+								print("Assets URL count: \(self.assetsURLArr.count)")
+								
+								print("exported at \(name)")
+
+								DispatchQueue.main.async {
+									self.collectionView.reloadData()
+								}
+
+
+
+							case .failed:
+								print("failed \(exportSession.error)")
+							case .cancelled:
+								print("failed \(exportSession.error)")
+							default:
+								break
 							}
 						}
-						
-						DispatchQueue.main.async {
-							self.collectionView.reloadData()
-						}
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-//						do {
-//							// do second one
-//							name = outputURL.appendingPathComponent("cutVideo0.mp4")
-//						}catch let error {
-//							print(error)
-//						}
-//
-//						DispatchQueue.main.async {
-//							progress = (self.scrubbedTimeLocation?.x)! / cell.frame.maxX
-//						}
-//						time = Double(progress) * asset.duration.seconds
-//						convertedTime = CMTimeMake(Int64(time), 1)
-//
-//						timeRange = CMTimeRange(start: CMTimeMake(Int64(0), 1), end: convertedTime)
-//
-//						guard let exportSession2 = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {return}
-//						exportSession2.outputURL = name
-//						exportSession2.outputFileType = AVFileType.mov
-//						exportSession2.timeRange = timeRange
-//
-//						exportSession2.exportAsynchronously {
-//							switch exportSession2.status {
-//							case .completed:
-//								let assetURL = outputURL
-//								let asset = AVAsset.init(url: assetURL)
-//
-//								self.assetsArr.append(asset)
-//								self.assetsURLArr.append(assetURL)
-//
-//								print("exported at \(name)")
-//
-////								if let index = self.assetsURLArr.index(of: cell.assetURL!) {
-////									self.assetsArr.remove(at: index)
-////									self.assetsURLArr.remove(at: index)
-////
-////									_ = try? fileManager.removeItem(at: cell.assetURL!)
-////
-////									DispatchQueue.main.async {
-////										self.collectionView.reloadData()
-////									}
-////								}
-//								DispatchQueue.main.async {
-//									self.collectionView.reloadData()
-//								}
-//
-//
-//
-//							case .failed:
-//								print("failed \(exportSession.error)")
-//							case .cancelled:
-//								print("failed \(exportSession.error)")
-//							default:
-//								break
-//							}
-//						}
 						
 						
 						
