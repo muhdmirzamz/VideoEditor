@@ -338,7 +338,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 						print("Assets URL count: \(self.assetsURLArr.count)")
 						print("Assets: \(self.assetsArr.description)")
 						
-						self.assetsArr.append(asset)
+						self.assetsArr.append(asset2)
 						self.assetsURLArr.append(assetURL)
 						
 						print("Assets count: \(self.assetsArr.count)")
