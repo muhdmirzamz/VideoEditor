@@ -293,11 +293,24 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				// so now you have "originalDir/output"
 				var outputURL = documentDirectory.appendingPathComponent("output")
 				var name = outputURL
+				
+				let test = (cell.assetURL?.absoluteString)!
+				let end = test.index(test.endIndex, offsetBy: -4)
+				let start = test.index(test.endIndex, offsetBy: -40)
+				let range = start ..< end
+				let nTest = test[range]
+				print("Test: \(nTest)")
+				// 3A04BC52-2840-4C8E-9DE2-543B1AEA119A.MOV
+				// 3A04BC52-2840-4C8E-9DE2-543B1AEA119A
+				
+				// /1A6D6A5B-32AF-49EF-9BAE-F0EA0E052EC3
+				//  1A6D6A5B-32AF-49EF-9BAE-F0EA0E052EC3
+				
 				do {
 					try fileManager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
 					
 					// so now you have "originalDir/output/name.mp4"
-					name = outputURL.appendingPathComponent("cutVideo.mp4")
+					name = outputURL.appendingPathComponent("\(nTest)_cutVideo.mp4")
 				}catch let error {
 					print(error)
 				}
@@ -328,21 +341,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 					case .completed:
 						let assetURL = name
 						asset2 = AVAsset.init(url: assetURL)
-						
-						print("asset duration after export:\(asset.duration.seconds)")
-						print("asset2 duration after export:\(asset2.duration.seconds)")
-						
-						
-						print("First")
-						print("Assets count: \(self.assetsArr.count)")
-						print("Assets URL count: \(self.assetsURLArr.count)")
+
 						print("Assets: \(self.assetsArr.description)")
 						
 						self.assetsArr.append(asset2)
 						self.assetsURLArr.append(assetURL)
 						
-						print("Assets count: \(self.assetsArr.count)")
-						print("Assets URL count: \(self.assetsURLArr.count)")
 						print("Assets: \(self.assetsArr.description)")
 						
 						print("exported at \(name)")
@@ -353,7 +357,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 					
 						// so now you have "originalDir/output/name.mp4"
 						print("Output url \(outputURL)")
-						name = outputURL.appendingPathComponent("cutVideo0.mp4")
+						name = outputURL.appendingPathComponent("\(nTest)_cutVideo0.mp4")
 						print("name \(name)")
 						
 						var progress: CGFloat = 0
@@ -377,33 +381,24 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 								let assetURL = name
 								let asset = AVAsset.init(url: assetURL)
 
-								print("Second")
-								print("Assets count: \(self.assetsArr.count)")
-								print("Assets URL count: \(self.assetsURLArr.count)")
 								print("Assets: \(self.assetsArr.description)")
 								
 								self.assetsArr.append(asset)
 								self.assetsURLArr.append(assetURL)
 
-								print("Assets count: \(self.assetsArr.count)")
-								print("Assets URL count: \(self.assetsURLArr.count)")
 								print("Assets: \(self.assetsArr.description)")
 								
 								print("exported at \(name)")
 								
 								
 								if let index = self.assetsURLArr.index(of: cell.assetURL!) {
-									print("Assets count: \(self.assetsArr.count)")
-									print("Assets URL count: \(self.assetsURLArr.count)")
 									print("Assets: \(self.assetsArr.description)")
 									
 									self.assetsArr.remove(at: index)
 									self.assetsURLArr.remove(at: index)
 									
 									print("Removed at")
-									
-									print("Assets count: \(self.assetsArr.count)")
-									print("Assets URL count: \(self.assetsURLArr.count)")
+
 									print("Assets: \(self.assetsArr.description)")
 									
 									_ = try? fileManager.removeItem(at: cell.assetURL!)
