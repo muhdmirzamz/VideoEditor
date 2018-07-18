@@ -47,10 +47,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		// Dispose of any resources that can be recreated.
 	}
 	
-	
-	
-	
-	
+	// MARK: loading
 	@IBAction func loadVideo() {
 		let imagePicker = UIImagePickerController()
 		imagePicker.delegate = self
@@ -75,6 +72,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		self.present(alert, animated: true, completion: nil)
 	}
 	
+	
+	// MARK: image picker controller functions
 	public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
 		let mediaInfo = info[UIImagePickerControllerMediaType] as! String
 		
@@ -97,11 +96,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	
 	
-	
-	
-	
-	
-	
+	// MARK: action functions
 	@IBAction func merge() {
 		let mixComposition = AVMutableComposition()
 		
@@ -500,7 +495,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	
 	
 	
-	
+	// MARK: video composition
 	func videoCompositionInstructionForTrack(track: AVCompositionTrack, asset: AVAsset) -> AVMutableVideoCompositionLayerInstruction {
 		let instruction = AVMutableVideoCompositionLayerInstruction(assetTrack: track)
 		let assetTrack = asset.tracks(withMediaType: AVMediaType.video)[0]
@@ -546,8 +541,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		return (assetOrientation, isPortrait)
 	}
 	
-	
-	
+	// MARK: collection view stuff
 	public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
 		return self.assetsArr.count
 	}
@@ -580,6 +574,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		return 1
 	}
 	
+	// MARK: touches
 	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 		var touchLocation = touches.first?.location(in: self.view)
 		
