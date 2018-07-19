@@ -31,13 +31,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		// Do any additional setup after loading the view, typically from a nib.
 		
 		self.collectionView.backgroundColor = .blue
+		self.collectionView.delegate = self
+		self.collectionView.dataSource = self
 		
 		self.scrubber = UIView.init(frame: CGRect.init(x: self.collectionView.frame.origin.x, y: self.collectionView.frame.origin.y - 10, width: 5, height: self.collectionView.frame.size.height + 20))
 		self.scrubber?.backgroundColor = .red
 		self.view.addSubview(self.scrubber!)
-		
-		self.collectionView.delegate = self
-		self.collectionView.dataSource = self
 		
 		try! AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: [])
 	}
@@ -60,6 +59,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			
 			self.present(imagePicker, animated: true, completion: nil)
 		}
+		
 		let libraryOption = UIAlertAction.init(title: "Photo Library", style: .default) { (action) in
 			imagePicker.sourceType = .photoLibrary
 			
@@ -102,13 +102,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		var tracks = [AVMutableCompositionTrack]()
 
-		var initialDuration: CMTime?
+		var initialDuration: CMTime? // set this to zero from the get go
 		var duration: CMTime?
 		
 		// adding track
 		for i in 0 ..< self.assetsArr.count {
 			let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 			
+			// delete this
 			if i == 0 {
 				initialDuration = kCMTimeZero
 			}
@@ -295,11 +296,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				let range = start ..< end
 				let nTest = test[range]
 				print("Test: \(nTest)")
-				// 3A04BC52-2840-4C8E-9DE2-543B1AEA119A.MOV
-				// 3A04BC52-2840-4C8E-9DE2-543B1AEA119A
-				
-				// /1A6D6A5B-32AF-49EF-9BAE-F0EA0E052EC3
-				//  1A6D6A5B-32AF-49EF-9BAE-F0EA0E052EC3
 				
 				do {
 					try fileManager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
