@@ -102,26 +102,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		
 		var tracks = [AVMutableCompositionTrack]()
 
-		var initialDuration: CMTime? // set this to zero from the get go
+		var initialDuration: CMTime = kCMTimeZero
 		var duration: CMTime?
 		
 		// adding track
 		for i in 0 ..< self.assetsArr.count {
 			let track = mixComposition.addMutableTrack(withMediaType: .video, preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
 			
-			// delete this
-			if i == 0 {
-				initialDuration = kCMTimeZero
-			}
-			
 			do {
-				try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: initialDuration!)
+				try track?.insertTimeRange(CMTimeRangeMake(kCMTimeZero, self.assetsArr[i].duration), of: self.assetsArr[i].tracks(withMediaType: .video)[0], at: initialDuration)
 			} catch {
 				print("Failed to load track")
 			}
 			
-			duration = initialDuration! + self.assetsArr[i].duration
-			initialDuration = duration
+			duration = initialDuration + self.assetsArr[i].duration
+			initialDuration = duration!
 			
 			tracks.append(track!)
 
@@ -133,14 +128,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		let mainInstruction = AVMutableVideoCompositionInstruction()
 		
 		var time: CMTime?
-		var initialTime: CMTime?
+		var initialTime: CMTime = kCMTimeZero
 		for i in 0 ..< self.assetsArr.count {
-			if i == 0 {
-				initialTime = CMTimeAdd(kCMTimeZero, self.assetsArr[i].duration)
-			} else {
-				time = initialTime! + self.assetsArr[i].duration
-				initialTime = time
-			}
+			time = initialTime + self.assetsArr[i].duration
+			initialTime = time!
+			
+			
+//			if i == 0 {
+//				initialTime = CMTimeAdd(kCMTimeZero, self.assetsArr[i].duration)
+//			} else {
+//				time = initialTime! + self.assetsArr[i].duration
+//				initialTime = time
+//			}
 		}
 
 		if let time = time {
@@ -450,26 +449,37 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 			
 			let outputURL = session.outputURL
 			
-			PHPhotoLibrary.shared().performChanges({
-				let fetchOptions = PHFetchOptions()
-				fetchOptions.predicate = NSPredicate(format: "title == %@", "Hello")
-				
-				if let assetCollection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions).firstObject {
-					let creationReq = PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: outputURL!)
-					let assetAddReq = PHAssetCollectionChangeRequest.init(for: assetCollection)
-					assetAddReq?.addAssets([(creationReq?.placeholderForCreatedAsset)!] as NSArray)
-				} else {
-					let creationReq = PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: outputURL!)
-					let assetAddReq = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "Hello")
-					assetAddReq.addAssets([(creationReq?.placeholderForCreatedAsset)!] as NSArray)
+			PHPhotoLibrary.requestAuthorization { (status) in
+				if status == PHAuthorizationStatus.authorized {
+					PHPhotoLibrary.shared().performChanges({
+						let fetchOptions = PHFetchOptions()
+						fetchOptions.predicate = NSPredicate(format: "title == %@", "Hello")
+						
+						if let assetCollection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions).firstObject {
+							let creationReq = PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: outputURL!)
+							print("After creationRequest")
+							let assetAddReq = PHAssetCollectionChangeRequest.init(for: assetCollection)
+							print("After declaration")
+							assetAddReq?.addAssets([(creationReq?.placeholderForCreatedAsset)!] as NSArray)
+							print("After adding assets")
+						} else {
+							let creationReq = PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: outputURL!)
+							let assetAddReq = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "Hello")
+							assetAddReq.addAssets([(creationReq?.placeholderForCreatedAsset)!] as NSArray)
+						}
+					}) { (success, error) in
+						if success {
+							let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
+							let okAction = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
+							
+							alertController.addAction(okAction)
+							
+							self.present(alertController, animated: true, completion: nil)
+						} else {
+							print("FAIL")
+						}
+					}
 				}
-			}) { (success, error) in
-				let alertController = UIAlertController.init(title: "Successfully saved", message: "", preferredStyle: .alert)
-				let okAction = UIAlertAction.init(title: "Ok", style: .default, handler: nil)
-				
-				alertController.addAction(okAction)
-				
-				self.present(alertController, animated: true, completion: nil)
 			}
 		}
 		
