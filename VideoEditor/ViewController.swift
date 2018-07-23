@@ -274,6 +274,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 	@IBAction func cut() {
 		// make sure there is a cell to cut
 		if let cell = self.scrubbedCell {
+			
+			let indexPath = self.collectionView.indexPath(for: cell)
+			print("Index path: \((indexPath?.row)!)")
+			
 			let fileManager = FileManager.default
 
 			// create a new directory
@@ -331,11 +335,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 					case .completed:
 						let assetURL = name
 						asset2 = AVAsset.init(url: assetURL)
-
-						print("Assets: \(self.assetsArr.description)")
 						
-						self.assetsArr.append(asset2)
-						self.assetsURLArr.append(assetURL)
+						print("First export\n\n")
+
+						let nextIndex = (indexPath?.row)! + 1
+						
+						self.assetsArr.insert(asset2, at: nextIndex)
+						self.assetsURLArr.insert(assetURL, at: nextIndex)
 						
 						print("Assets: \(self.assetsArr.description)")
 						
@@ -370,11 +376,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 							case .completed:
 								let assetURL = name
 								let asset = AVAsset.init(url: assetURL)
-
-								print("Assets: \(self.assetsArr.description)")
 								
-								self.assetsArr.append(asset)
-								self.assetsURLArr.append(assetURL)
+								print("Second export\n\n")
+								
+								let nextIndex = (indexPath?.row)! + 2
+								
+								self.assetsArr.insert(asset, at: nextIndex)
+								self.assetsURLArr.insert(assetURL, at: nextIndex)
 
 								print("Assets: \(self.assetsArr.description)")
 								
@@ -382,7 +390,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 								
 								
 								if let index = self.assetsURLArr.index(of: cell.assetURL!) {
-									print("Assets: \(self.assetsArr.description)")
+									print("Deleting\n\n")
 									
 									self.assetsArr.remove(at: index)
 									self.assetsURLArr.remove(at: index)
