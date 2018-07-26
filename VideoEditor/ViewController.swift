@@ -46,6 +46,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		// Dispose of any resources that can be recreated.
 	}
 	
+	// MARK: alert
+	func configureAlertAction(withTitle title: String, and imagePicker: UIImagePickerController) -> UIAlertAction {
+		return UIAlertAction.init(title: title, style: .default) { (action) in
+			if title == "Camera" {
+				imagePicker.sourceType = .camera
+			} else if title == "Photo Library" {
+				imagePicker.sourceType = .photoLibrary
+			}
+			
+			self.present(imagePicker, animated: true, completion: nil)
+		}
+	}
+	
 	// MARK: loading
 	@IBAction func loadVideo() {
 		let imagePicker = UIImagePickerController()
@@ -54,17 +67,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		imagePicker.mediaTypes = [kUTTypeMovie as String]
 		
 		let alert = UIAlertController.init(title: "Choose media", message: "", preferredStyle: .actionSheet)
-		let cameraOption = UIAlertAction.init(title: "Camera", style: .default) { (action) in
-			imagePicker.sourceType = .camera
-			
-			self.present(imagePicker, animated: true, completion: nil)
-		}
-		
-		let libraryOption = UIAlertAction.init(title: "Photo Library", style: .default) { (action) in
-			imagePicker.sourceType = .photoLibrary
-			
-			self.present(imagePicker, animated: true, completion: nil)
-		}
+		let cameraOption = self.configureAlertAction(withTitle: "Camera", and: imagePicker)
+		let libraryOption = self.configureAlertAction(withTitle: "Photo Library", and: imagePicker)
 		
 		alert.addAction(cameraOption)
 		alert.addAction(libraryOption)
@@ -132,14 +136,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		for i in 0 ..< self.assetsArr.count {
 			time = initialTime + self.assetsArr[i].duration
 			initialTime = time!
-			
-			
-//			if i == 0 {
-//				initialTime = CMTimeAdd(kCMTimeZero, self.assetsArr[i].duration)
-//			} else {
-//				time = initialTime! + self.assetsArr[i].duration
-//				initialTime = time
-//			}
 		}
 
 		if let time = time {
