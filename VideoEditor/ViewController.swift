@@ -289,18 +289,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 				var outputURL = documentDirectory.appendingPathComponent("output")
 				var name = outputURL
 				
-				let test = (cell.assetURL?.absoluteString)!
-				let end = test.index(test.endIndex, offsetBy: -4)
-				let start = test.index(test.endIndex, offsetBy: -40)
+				let initialAssetURL = (cell.assetURL?.absoluteString)!
+				let end = initialAssetURL.index(initialAssetURL.endIndex, offsetBy: -4)
+				let start = initialAssetURL.index(initialAssetURL.endIndex, offsetBy: -40)
 				let range = start ..< end
-				let nTest = test[range]
-				print("Test: \(nTest)")
+				let trimmedAssetURL = initialAssetURL[range]
+				print("Test: \(trimmedAssetURL)")
 				
 				do {
 					try fileManager.createDirectory(at: outputURL, withIntermediateDirectories: true, attributes: nil)
 					
 					// so now you have "originalDir/output/name.mp4"
-					name = outputURL.appendingPathComponent("\(nTest)_cutVideo.mp4")
+					name = outputURL.appendingPathComponent("\(trimmedAssetURL)_cutVideo.mp4")
 				}catch let error {
 					print(error)
 				}
@@ -349,7 +349,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 					
 						// so now you have "originalDir/output/name.mp4"
 						print("Output url \(outputURL)")
-						name = outputURL.appendingPathComponent("\(nTest)_cutVideo0.mp4")
+						name = outputURL.appendingPathComponent("\(trimmedAssetURL)_cutVideo0.mp4")
 						print("name \(name)")
 						
 						var progress: CGFloat = 0
