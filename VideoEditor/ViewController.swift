@@ -447,6 +447,31 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 		}
 	}
 	
+	@IBAction func deleteClip() {
+		// make sure there is a cell to cut
+		if let cell = self.scrubbedCell {
+			if let index = self.assetsURLArr.index(of: cell.assetURL!) {
+				print("Deleting\n\n")
+				
+				self.assetsArr.remove(at: index)
+				self.assetsURLArr.remove(at: index)
+				
+				print("Removed at")
+				
+				print("Assets: \(self.assetsArr.description)")
+				
+				let fileManager = FileManager.default
+				
+				_ = try? fileManager.removeItem(at: cell.assetURL!)
+				
+			}
+			
+			DispatchQueue.main.async {
+				self.collectionView.reloadData()
+			}
+		}
+	}
+	
 	func exportDidFinish(session: AVAssetExportSession) {
 		if session.status == .completed {
 			print("Completed")
